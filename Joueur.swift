@@ -85,11 +85,12 @@ class Joueur : TJoueur {
     }
     
     func PieceDispo(nom : String) throws -> Bool  {
-         if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
+        var res : Bool = false
+
+        if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
             throw erreur.mauvaisNomForme 
         }
         else { 
-            var res : Bool = false
              for p in _listePieces {
                  if (p.nom === nom){
                       res = true
@@ -113,22 +114,23 @@ class Joueur : TJoueur {
 
     
     // Précondition:La pièce prise en paramètre a bien été placée  et c'est le joueur courant en paramètre ????? VERIFIER ????
-    mutating func retirerPiece(p:Piece) throws -> String {
+    mutating func retirerPiece(p : Piece) throws -> String {
         guard self._listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { throw erreur.pieceAbsente}
         self._listePieces.remove(p)
 
     }
 
  
-    func stringToPiece (nom : String) throws -> Piece { ////NE PAS METTRE RETURN DANS BOUCLE
+    func stringToPiece (nom : String) throws -> Piece { 
         if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
             throw erreur.mauvaisNomForme 
         }
         else { 
             if PieceDispo(nom : nom){ 
+              
                  for p in _listePieces {
                     if (p.nom === nom){
-                        return p
+                     return p
                     }
                  }  
             }else{ 

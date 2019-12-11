@@ -65,7 +65,7 @@ protocol TJeu {
 
     // Placer : Jeu x Joueur x Piece x Int x Int ->  Jeu
     // Fonction qui place la pièce du joueur
-    // Précondition :  PeutPoser(Jeu,Piece,x,y) =True
+    // Précondition :  PeutPlacer(Jeu,Piece,x,y) =True
     // Résultat : Renvoie le jeu modifié avec une nouvelle pièce posée sur le plateau
     // et le nombre de pièces du joueur réduite d'une. 
     // Postcondition : Retire la piece au joueur ( retirerPiece(p : p))
@@ -116,6 +116,7 @@ protocol TJeu {
 
 enum erreur : Error {
     case coordonneeHorsGrille
+    case peutPasPoser
     
 }
 
@@ -192,13 +193,17 @@ class Jeu : TJeu {
     // Résultat : Renvoie vrai si la pièce peut être placée Sinon faux
     func PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool
 
-    // Placer : Jeu x Joueur x Piece x Int x Int ->  Jeu
-    // Fonction qui place la pièce du joueur
-    // Précondition :  PeutPoser(Jeu,Piece,x,y) =True
-    // Résultat : Renvoie le jeu modifié avec une nouvelle pièce posée sur le plateau
-    // et le nombre de pièces du joueur réduite d'une. 
-    // Postcondition : Retire la piece au joueur ( retirerPiece(p : p))
-    mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) 
+
+    // ORAL ERREUR PeutPLacer et pas PeutPoser dans préconditions
+    mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) throws {
+        if !PeutPlacer(j : j, p : p, x :x, y : y){
+            throw erreur.peutPasPoser
+        }else{
+            grille[x][y] = p
+            j.retirerPiece(p : Piece)
+        }
+
+    }
 
   
 
@@ -220,21 +225,52 @@ class Jeu : TJeu {
         }
     }
 
-    // ColonneRemplie : Jeu x Int  -> Bool
-    // Informe si la colonne est complétée
-    // Paramètre : Jeu, Int
-    // Précondition : 0<=y<=3
-    // Précondition : y le numéro de la colonne
-    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func ColonneRemplie( y : Int) -> Bool
+    
+    func ColonneRemplie( y : Int) -> Bool {
+         if !(0<=y && y<=3){ 
+            throw erreur.coordonneeHorsGrille }
+        else {
+            var i : Int = 0
+            var res : Bool = true
+            while i<4 && res {
+                if CaseVide(x:i,y:y) {
+                    res = false
+                }
+                i+=1
+            }
+           return res
+        }
+    }
 
-    // ZoneRemplie : Jeu x Int x Int -> Bool 
-    // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
+    //fonction qui permet de retourner en haut à gauche d'une région
+    private func region(x : Int, y : Int) -> (Int,Int){
+        return ((x/2*2),(y/2*2))
+    }
 
-    // Précondition : x le numéro de la ligne , y le numéro de la colonne
-    // Précondition : 0<=x,y<=3
-    // Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon
     func ZoneRemplie(x : Int, y : Int) -> Bool {
+
+        if !(0<=x && x<=3) && !(0<=y && y<=3) { 
+            throw erreur.coordonneeHorsGrille }
+        else { 
+            var res : Bool = true
+            //récupérer les coordonnée en haut à gauche de la zone
+            var coord : (Int,Int) = region(x : x, y : y)
+            var l : Int = coord[0]
+            var c : Int = coord[1]
+
+
+            while res && ((l <= coord[0]+1) && (c <= coord[1]+1)) { //je n'ai pas trouvé de case vide et je ne suis pas en bas à droite de ma zone
+                if CaseVide(x:l,y:c) {
+                    res = false
+                }
+                c = c+1 //passe à la colonne suivante
+                if c > coord[1]+1 { // passe à la ligne suivante
+                    c = coord[0]
+                    l = l+1 }
+            }
+            return res
+
+        }
 
     }
 
