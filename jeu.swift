@@ -143,39 +143,46 @@ struct Jeu : TJeu {
     var jCourant : Joueur  { get }
 
 
+
     func CaseVide( x : Int, y : Int) throws Bool{
-        if (x < 4 && y < 4) {
+        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
             return grille[x][y] == nil
         } else {
             throw erreur.mauvaiseCoordonnees
         }
     }
 
-    // LigneDispo : Jeu x Joueur x Piece x Int  -> Bool 
-    // Paramètre : Jeu, Joueur le joueur courant
-    // Paramètre : Pièce : la pièce séléctionnée par le joueur 
-    // Paramètre : x de type Int 
-    // Précondition : PieceDispo(Joueur,Piece)=True
-    // Précondition : x le numéro de la ligne est compris entre 0 et 3 
-    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
-    func LigneDispo ( j : Joueur , p : Piece , x : Int)  -> Bool
-        for i in range(0..4) {
-            var pieceTempo : Piece = getPiece(x, i)
+    func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws Bool {
+        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
+            throw coordonneesHorsGrille
+        } else {
+            return Dispo(j : j, p : p, tab : grille[x])
+        }
+    }
+
+    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool throws Bool{
+        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
+            throw coordonneesHorsGrille
+        } else {
+            var tab : [Piece] = []
+            for i in 0..4 {
+                //transforme une colonne en un tableau
+                tab[i] = getPiece(i, y);
+            }
+            return Dispo(j : j, p : p, tab : tab)
+        }
+    }
+
+    private func Dispo(j : Joueur, p : Piece , tab : [Piece]) -> Bool {
+        for i in 0..4 {
             //cas si une piece déjà placé a le meme nom et la couleur du joueur adverse
-            if (pieceTempo.nom == p.nom && pieceTempo.couleur != j.couleur) {
-                return False
+            if (tab[i].nom == p.nom && tab[i].couleur != j.couleur) {
+                return false
             }
         }
         return True
-
-    // ColonneDispo : Jeu x Joueur x Piece x Int  -> Bool 
-    // Informe sur la possibilité de poser la pièce du joueur sur la colonne correspondante. 
-    // Paramètre : Jeu, Joueur le joueur courant
-    // Paramètre : Pièce : la pièce séléctionnée par le joueur 
-    // Paramètre : y de type Int
-    // Précondition : PieceDispo(Joueur,Piece)=True et y le numéro de la colonne comprise entre 0 et 3 incluse
-    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
-    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool 
+        }
+    }
 
     // ZoneDispo : Jeu x Joueur x Piece x Int x Int   -> Bool 
     // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
