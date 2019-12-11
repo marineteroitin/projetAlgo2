@@ -30,17 +30,14 @@ protocol TPiece {
 
 class Piece : TPiece {
 
-	private var _nom : String 
-	private var _couleur : String 
-	private var _forme : String 
+	private (set) var nom : String 
+	private (set) var couleur : String 
+	private (set) var forme : String 
 
-	var nom : String {return self._nom}
-	var couleur : String {return self._couleur}
-	var forme : String {return  self._forme}
-
-	init(_ nom : String,_ couleur : String,_ forme : String) {
-		self._nom = nom
-		self._couleur = couleur
-		self._forme = forme
+	
+	required init(nom : String, couleur : String, forme : String) {
+		self.nom = nom
+		self.couleur = couleur
+		self.forme = forme
 	}
 }

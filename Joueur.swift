@@ -18,7 +18,7 @@ protocol TJoueur {
     // Paramètre : Joueur , String 
     // Précondition : le nom de type String est l'un de ces choix :  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle
     // Résultat : renvoie True si le joueur possède encore cette pièce, False sinon 
-    func PieceDispo(nom : String) -> Bool  
+    func PieceDispo(nom : String) throws -> Bool  
 
     // PieceRestantes : Joueur -> [Piece]
     // Informe sur les pièces restantes et leur quantités
@@ -53,36 +53,25 @@ protocol TJoueur {
 
 
 
-enum erreur : Error {
-    case mauvaiseCouleur
-    case mauvaisNomForme
-    case pieceAbsente
-    
-}
-
-
 class Joueur : TJoueur {
     private var _listePieces : [Piece] = [Piece]()
 
     var listePieces : [Piece] { return self._listePieces }
 
-    init(couleur : String){
+    required init(couleur : String){
         self.couleur = couleur
         self._listePieces = [ p1 : Piece("ca",couleur,"25A0"), p2 : Piece("ca",couleur,"25A0"), p3 : Piece("cy",couleur,"26C1"), p4 : Piece("cy",couleur,"26C1"), p5 : Piece("ce",couleur,"2B24"), p6 : Piece("ce",couleur,"2B24"), p7 : Piece("tr",couleur,"1403"), p8 : Piece("tr",couleur,"1403") ]
     }
 
 
-    var couleur : String throws -> String { 
-        if !(self.couleur === "33" || self.couleur === "92") { 
-            throw erreur.mauvaiseCouleur }
-        else { return self.couleur}
-    }
+    private (set) var couleur : String  
+    
     
     func PieceDispo(nom : String) throws -> Bool  {
         var res : Bool = false
 
         if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
-            throw erreur.mauvaisNomForme 
+            throw MesErreur.mauvaisNomForme 
         }
         else { 
              for p in _listePieces {
@@ -105,33 +94,30 @@ class Joueur : TJoueur {
     // Paramètres : Jeu , Joueur 
     // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
     func peutJouer(jeu : Jeu) -> Bool {
+        // A CODER !!!!!!!!!!
         return false
     }
 
     
     // Précondition:La pièce prise en paramètre a bien été placée  et c'est le joueur courant en paramètre ????? VERIFIER ????
-    mutating func retirerPiece(p : Piece) throws -> String {
-        guard self._listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { throw erreur.pieceAbsente}
+   func retirerPiece(p : Piece) throws {
+        guard self._listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { throw MesErreur.pieceAbsente}
         self._listePieces.remove(p)
 
     }
 
  
-    func stringToPiece (nom : String) throws -> Piece? { 
-        var res : Piece = nil
-        if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
-            throw erreur.mauvaisNomForme 
+    func stringToPiece (nom : String) throws -> Piece { 
+        var res : Piece 
+        guard (nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") else { 
+            throw MesErreur.mauvaisNomForme 
         }
-        else { 
-            if PieceDispo(nom : nom){ 
-                 for p in _listePieces {
-                    if (p.nom === nom){
-                     return p
-                    }
-                 }  
-            }else{ 
-                throw erreur.pieceAbsente
+        guard PieceDispo(nom : nom) else {  throw MesErreur.pieceAbsente }
+        for p in _listePieces {
+            if (p.nom === nom){
+                res = p
             }
-        } 
+        }
+        return res  
     }
 }

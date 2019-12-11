@@ -114,11 +114,7 @@ protocol TJeu {
 
 }
 
-enum erreur : Error {
-    case coordonneeHorsGrille
-    case peutPasPoser
-    
-}
+
 
 class Jeu : TJeu {
 
@@ -137,49 +133,41 @@ class Jeu : TJeu {
     // avec 0 <= x,y <= 3
     // Postcondition : Renvoie le Jeu avec 2 joueurs de couleurs différentes qui chacun possède 8 pièces de leurs couleurs 
     // composées de 2 carrés, 2 cercles , 2 cylindres , 2 triangles 
-    init() {
+    required init() {
 
         _j1 = Joueur("33")
         _j2 = Joueur("96")
         _grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count: 4) //Init a null
     }
 
-    func CaseVide( x : Int, y : Int) throws -> Bool{
+    func CaseVide( x : Int, y : Int) -> Bool {
+        var res : Bool = true
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            return getPiece(x,y) == nil
-
-
-
+            res =  (getPiece(x,y) == nil)
+        }
+        return res
     }
 
-
-    
-    // jCourant : Jeu -> Joueur
-    // Paramètre : Jeu
-    // Postcondition : Renvoie le joueur courant de la partie 
-    // Renvoie le joueur courant  
-    var jCourant : Joueur  { get }
-
-    func CaseVide( x : Int, y : Int) throws Bool{
+    func CaseVide( x : Int, y : Int) throws -> Bool{
         if x < 4 && y < 4 {
             return grille[x][y] == nil
         } else {
-            throw erreur.mauvaiseCoordonnee
+            throw MesErreur.mauvaiseCoordonnee
         }
     }
 
 
-    func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws -> Bool {
+    func LigneDispo ( j : Joueur , p : Piece , x : Int) throws -> Bool {
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            throw coordonneesHorsGrille
+            throw MesErreur.coordonneesHorsGrille
         } else {
             return Dispo(j : j, p : p, tab : grille[x])
         }
     }
 
-    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool throws -> Bool{
+    func ColonneDispo( j : Joueur , p : Piece, y : Int )throws -> Bool{
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            throw coordonneesHorsGrille
+            throw MesErreur.coordonneesHorsGrille
         } else {
             var tab : [Piece] = []
             for i in 0..4 {
@@ -206,9 +194,9 @@ class Jeu : TJeu {
     // Param : Jeu, Joueur, Pièce, x de type Int, y de type Int
     // Précondition : PieceDispo(Joueur,Piece)=True et x, la ligne ,y la colonne, comprisent entre 0 et 3 inclus
     // Résultat :  Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
-    func ZoneDispo( j : Joueur , p : Piece, x : Int, y : Int ) -> Bool throws -> Bool {
+    func ZoneDispo( j : Joueur , p : Piece, x : Int, y : Int ) throws -> Bool {
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            throw coordonneesHorsGrille
+            throw MesErreur.coordonneesHorsGrille
         } else {
             var tab : [Int]
             var coord : (Int, Int) = region(x : x, y : y)
@@ -246,7 +234,7 @@ class Jeu : TJeu {
     // ORAL ERREUR PeutPLacer et pas PeutPoser dans préconditions
     mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) throws {
         if !PeutPlacer(j : j, p : p, x :x, y : y){
-            throw erreur.peutPasPoser
+            throw MesErreur.peutPasPoser
         }else{
             grille[x][y] = p
             j.retirerPiece(p : Piece)
@@ -258,9 +246,9 @@ class Jeu : TJeu {
 
     //ORAL ERREUR SUR CE QUE DOIT RENVOYER LA FONCTION CAR COPIER/COLLER DE LIGNEDISPO -> Renvoie True si toute les cases de la ligne sont remplies
     //IDEM POUR LES AUTRES FONCTIONS REMPLIE
-    func LigneRemplie( x : Int) -> Bool{
+    func LigneRemplie( x : Int) throws -> Bool{
          if !(0<=x && x<=3){ 
-            throw erreur.coordonneeHorsGrille }
+            throw MesErreur.coordonneeHorsGrille }
         else {
             var i : Int = 0
             var res : Bool = true
@@ -275,9 +263,9 @@ class Jeu : TJeu {
     }
 
     
-    func ColonneRemplie( y : Int) -> Bool {
+    func ColonneRemplie( y : Int) throws -> Bool {
          if !(0<=y && y<=3){ 
-            throw erreur.coordonneeHorsGrille }
+            throw MesErreur.coordonneeHorsGrille }
         else {
             var i : Int = 0
             var res : Bool = true
@@ -296,10 +284,10 @@ class Jeu : TJeu {
         return ((x/2*2),(y/2*2))
     }
 
-    func ZoneRemplie(x : Int, y : Int) -> Bool {
+    func ZoneRemplie(x : Int, y : Int) throws -> Bool {
 
         if !(0<=x && x<=3) && !(0<=y && y<=3) { 
-            throw erreur.coordonneeHorsGrille }
+            throw MesErreur.coordonneeHorsGrille }
         else { 
             var res : Bool = true
             //récupérer les coordonnée en haut à gauche de la zone
@@ -328,7 +316,7 @@ class Jeu : TJeu {
     // ORAL DIRE OUBLIE -> Précondition : 0<=x,y<=3
     func estFini( x : Int, y : Int) throws -> Bool {
         if !(0<=x && x<=3) && !(0<=y && y<=3) { 
-            throw erreur.coordonneeHorsGrille }
+            throw MesErreur.coordonneeHorsGrille }
         else {
              return LigneRemplie( x : x) || ColonneRemplie( y : y) || ZoneRemplie(x : x, y : y) }
     }
@@ -342,7 +330,7 @@ class Jeu : TJeu {
     
     func getPiece( x : Int, y : Int) -> Piece?{
         if CaseVide(x:x,y:y) { return nil }
-        else { return grille.[x][y] }
+        else { return grille[x][y] }
     }
 
 }
