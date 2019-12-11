@@ -30,13 +30,13 @@ protocol TPiece {
 
 class Piece : TPiece {
 
-	private var _nom: String 
+	private var _nom : String 
 	private var _couleur : String 
 	private var _forme : String 
 
-	var nom : String {return self.nom}
-	var couleur : String {return self.couleur}
-	var forme : String {return  self.forme}
+	var nom : String {return self._nom}
+	var couleur : String {return self._couleur}
+	var forme : String {return  self._forme}
 
 
     //RAJOUT DU PARAMETRE forme DANS LE INIT (MANQUANT)

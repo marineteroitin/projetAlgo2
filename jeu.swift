@@ -118,9 +118,11 @@ protocol TJeu {
 struct Jeu : TJeu {
 
 
-    var grille : [[Piece]]
-    private var j1 : Joueur
-    private var j2 : Joueur
+    private var _grille : [[Piece]]
+    private var _j1 : Joueur
+    private var _j2 : Joueur
+
+    var jCourant : Joueur {return self._jCourant}
 
     // init : -> Jeu
     // Fonction de création du jeu et de 2 joueurs de couleurs différentes
@@ -130,29 +132,20 @@ struct Jeu : TJeu {
     // Postcondition : Renvoie le Jeu avec 2 joueurs de couleurs différentes qui chacun possède 8 pièces de leurs couleurs 
     // composées de 2 carrés, 2 cercles , 2 cylindres , 2 triangles 
     init() {
-        j1 = Joueur("33")
-        j2 = Joueur("96")
-        grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count(4)) //Init a null
+        _j1 = Joueur("33")
+        _j2 = Joueur("96")
+        _grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count: 4) //Init a null
     }
 
-    
-    // jCourant : Jeu -> Joueur
-    // Paramètre : Jeu
-    // Postcondition : Renvoie le joueur courant de la partie 
-    // Renvoie le joueur courant  
-    var jCourant : Joueur  { get }
-
-
-
-    func CaseVide( x : Int, y : Int) throws Bool{
+    func CaseVide( x : Int, y : Int) throws -> Bool{
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            return grille[x][y] == nil
+            return getPiece(x,y) == nil
         } else {
-            throw erreur.mauvaiseCoordonnees
+            throw erreur.mauvaiseCoordonnee
         }
     }
 
-    func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws Bool {
+    func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws -> Bool {
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
             throw coordonneesHorsGrille
         } else {
@@ -160,7 +153,7 @@ struct Jeu : TJeu {
         }
     }
 
-    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool throws Bool{
+    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool throws -> Bool{
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
             throw coordonneesHorsGrille
         } else {
@@ -174,14 +167,14 @@ struct Jeu : TJeu {
     }
 
     private func Dispo(j : Joueur, p : Piece , tab : [Piece]) -> Bool {
+        var dispo : Bool = true
         for i in 0..4 {
             //cas si une piece déjà placé a le meme nom et la couleur du joueur adverse
             if (tab[i].nom == p.nom && tab[i].couleur != j.couleur) {
-                return false
+                dispo = false
             }
         }
-        return True
-        }
+        return dispo
     }
 
     // ZoneDispo : Jeu x Joueur x Piece x Int x Int   -> Bool 
@@ -189,7 +182,23 @@ struct Jeu : TJeu {
     // Param : Jeu, Joueur, Pièce, x de type Int, y de type Int
     // Précondition : PieceDispo(Joueur,Piece)=True et x, la ligne ,y la colonne, comprisent entre 0 et 3 inclus
     // Résultat :  Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
-    func ZoneDispo( j : Joueur , p : Piece, x : Int, y : Int ) -> Bool
+    func ZoneDispo( j : Joueur , p : Piece, x : Int, y : Int ) -> Bool throws -> Bool {
+        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
+            throw coordonneesHorsGrille
+        } else {
+            var tab : [Int]
+            var coord : (Int, Int) = region(x : x, y : y)
+            var compteur : Int = 0
+
+            for i in (coord[0])...(coord[0]+1) {
+                for j in (coord[1])...(coord[1]+1) {
+                    tab[compteur] = getPiece(i, j)
+                    compteur += 1
+                }
+            }
+            return Dispo(j : j, p : p, tab : tab)
+        }
+    }
 
     // PeutPlacer : Jeu x Joueur x Piece x Int x Int -> Bool
     // renvoie un booléen afin de savoir si le joueur peut poser sa pièce sur la case. 
@@ -200,7 +209,14 @@ struct Jeu : TJeu {
     // Précondtion : CaseVide(Jeu,x,y) = True  , PieceDispo(Joueur,Piece) = True  , 
     // Précondition : x numéro de ligne, y numéro de colonne
     // Résultat : Renvoie vrai si la pièce peut être placée Sinon faux
-    func PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool
+    func PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool {
+        var bool : Bool = false
+        if getPiece(x, y) != nil{
+            bool = (ZoneDispo( j : j, p : p, x : x, y : y) && LigneDispo( j : j, p : p, x : x) && ColonneDispo( j : j, p : p, y : y))
+        }
+        return bool
+    }
+
 
     // Placer : Jeu x Joueur x Piece x Int x Int ->  Jeu
     // Fonction qui place la pièce du joueur
