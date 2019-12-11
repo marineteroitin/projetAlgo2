@@ -161,11 +161,12 @@ struct Jeu : TJeu {
     func LigneDispo ( j : Joueur , p : Piece , x : Int)  -> Bool
         for i in range(0..4) {
             var pieceTempo : Piece = getPiece(x, i)
+            //cas si une piece déjà placé a le meme nom et la couleur du joueur adverse
             if (pieceTempo.nom == p.nom && pieceTempo.couleur != j.couleur) {
-
-
+                return False
             }
         }
+        return True
 
     // ColonneDispo : Jeu x Joueur x Piece x Int  -> Bool 
     // Informe sur la possibilité de poser la pièce du joueur sur la colonne correspondante. 
