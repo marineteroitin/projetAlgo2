@@ -89,14 +89,15 @@ class Joueur : TJoueur {
             throw erreur.mauvaisNomForme 
         }
         else { 
+            var res : Bool = false
              for p in _listePieces {
                  if (p.nom === nom){
-                      return true
+                      res = true
                 }
             }
            
         }
-        return false
+        return res
     }
    
     func PieceRestantes() -> [Piece] {
@@ -119,7 +120,7 @@ class Joueur : TJoueur {
     }
 
  
-    func stringToPiece (nom : String) throws -> Piece {
+    func stringToPiece (nom : String) throws -> Piece { ////NE PAS METTRE RETURN DANS BOUCLE
         if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
             throw erreur.mauvaisNomForme 
         }

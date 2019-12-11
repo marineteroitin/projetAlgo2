@@ -76,7 +76,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int 
     // Précondition : 0<=x<=3
     // Précondition : x le numéro de la ligne
-    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la ligne à ses cases remplies
     func LigneRemplie( x : Int) -> Bool
 
     // ColonneRemplie : Jeu x Int  -> Bool
@@ -84,7 +84,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int
     // Précondition : 0<=y<=3
     // Précondition : y le numéro de la colonne
-    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la colonne à ses cases remplies
     func ColonneRemplie( y : Int) -> Bool
 
     // ZoneRemplie : Jeu x Int x Int -> Bool 
@@ -92,7 +92,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int, Int. 
     // Précondition : x le numéro de la ligne , y le numéro de la colonne
     // Précondition : 0<=x,y<=3
-    // Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la zone à ses cases remplies
     func ZoneRemplie(x : Int, y : Int) -> Bool
 
     // estFini : Jeu x Int x Int -> Bool
@@ -114,11 +114,15 @@ protocol TJeu {
 
 }
 
+enum erreur : Error {
+    case coordonneeHorsGrille
+    
+}
 
-struct Jeu : TJeu {
+class Jeu : TJeu {
 
 
-    var grille : [[Piece]]
+    var grille : [[Int]]
     private var j1 : Joueur
     private var j2 : Joueur
 
@@ -132,8 +136,10 @@ struct Jeu : TJeu {
     init() {
         j1 = Joueur("33")
         j2 = Joueur("96")
-        grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count(4)) //Init a null
+        grille = [[Int]](repeating:[Int](repeating:Int, count: 4), count(4)) //Init a null
+
     }
+
 
     
     // jCourant : Jeu -> Joueur
@@ -142,47 +148,31 @@ struct Jeu : TJeu {
     // Renvoie le joueur courant  
     var jCourant : Joueur  { get }
 
-
-
     func CaseVide( x : Int, y : Int) throws Bool{
-        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
+        if x < 4 && y < 4 {
             return grille[x][y] == nil
         } else {
             throw erreur.mauvaiseCoordonnees
         }
     }
 
-    func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws Bool {
-        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            throw coordonneesHorsGrille
-        } else {
-            return Dispo(j : j, p : p, tab : grille[x])
-        }
-    }
+    // LigneDispo : Jeu x Joueur x Piece x Int  -> Bool 
+    // Paramètre : Jeu, Joueur le joueur courant
+    // Paramètre : Pièce : la pièce séléctionnée par le joueur 
+    // Paramètre : x de type Int 
+    // Précondition : PieceDispo(Joueur,Piece)=True
+    // Précondition : x le numéro de la ligne est compris entre 0 et 3 
+    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
+    func LigneDispo ( j : Joueur , p : Piece , x : Int)  -> Bool 
 
-    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool throws Bool{
-        if (x < 4 && y < 4 && y >= 0 && x >= 0) {
-            throw coordonneesHorsGrille
-        } else {
-            var tab : [Piece] = []
-            for i in 0..4 {
-                //transforme une colonne en un tableau
-                tab[i] = getPiece(i, y);
-            }
-            return Dispo(j : j, p : p, tab : tab)
-        }
-    }
-
-    private func Dispo(j : Joueur, p : Piece , tab : [Piece]) -> Bool {
-        for i in 0..4 {
-            //cas si une piece déjà placé a le meme nom et la couleur du joueur adverse
-            if (tab[i].nom == p.nom && tab[i].couleur != j.couleur) {
-                return false
-            }
-        }
-        return True
-        }
-    }
+    // ColonneDispo : Jeu x Joueur x Piece x Int  -> Bool 
+    // Informe sur la possibilité de poser la pièce du joueur sur la colonne correspondante. 
+    // Paramètre : Jeu, Joueur le joueur courant
+    // Paramètre : Pièce : la pièce séléctionnée par le joueur 
+    // Paramètre : y de type Int
+    // Précondition : PieceDispo(Joueur,Piece)=True et y le numéro de la colonne comprise entre 0 et 3 incluse
+    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
+    func ColonneDispo( j : Joueur , p : Piece, y : Int ) -> Bool 
 
     // ZoneDispo : Jeu x Joueur x Piece x Int x Int   -> Bool 
     // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
@@ -210,13 +200,25 @@ struct Jeu : TJeu {
     // Postcondition : Retire la piece au joueur ( retirerPiece(p : p))
     mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) 
 
-    // LigneRemplie : Jeu x Int  -> Bool
-    // Informe si la ligne est complétée
-    // Paramètre : Jeu, Int 
-    // Précondition : 0<=x<=3
-    // Précondition : x le numéro de la ligne
-    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func LigneRemplie( x : Int) -> Bool
+  
+
+    //ORAL ERREUR SUR CE QUE DOIT RENVOYER LA FONCTION CAR COPIER/COLLER DE LIGNEDISPO -> Renvoie True si toute les cases de la ligne sont remplies
+    //IDEM POUR LES AUTRES FONCTIONS REMPLIE
+    func LigneRemplie( x : Int) -> Bool{
+         if !(0<=x && x<=3){ 
+            throw erreur.coordonneeHorsGrille }
+        else {
+            var i : Int = 0
+            var res : Bool = true
+            while i<4 && res {
+                if CaseVide(x:x,y:i) {
+                    res = false
+                }
+                i+=1
+            }
+           return res
+        }
+    }
 
     // ColonneRemplie : Jeu x Int  -> Bool
     // Informe si la colonne est complétée
@@ -228,28 +230,35 @@ struct Jeu : TJeu {
 
     // ZoneRemplie : Jeu x Int x Int -> Bool 
     // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
-    // Paramètre : Jeu, Int, Int. 
+
     // Précondition : x le numéro de la ligne , y le numéro de la colonne
     // Précondition : 0<=x,y<=3
     // Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func ZoneRemplie(x : Int, y : Int) -> Bool
+    func ZoneRemplie(x : Int, y : Int) -> Bool {
 
-    // estFini : Jeu x Int x Int -> Bool
-    // Fonction qui permet de savoir si le jeu est fini  
-    // Précondition : x et y coordonnées de la dernière pièce placée 
-    // Résultat : renvoie vrai si LigneRemplie(jeu,x,y) = true ou ColonneRemplie(jeu,x,y) = true ou ZoneRemplie(jeu,x,y) = true , false sinon
-    func estFini( x : Int, y : Int) -> Bool
+    }
 
-    // joueurSuivant : Jeu -> Jeu
-    // Fonction qui permet de modifier le joueur courant.
-    // Postcondition : jCourant != joueurSuivant()
-    mutating func joueurSuivant()  
+   
+    // Précondition : x et y coordonnées de la dernière pièce placée A VERIFIER ??????
+    // ORAL DIRE OUBLIE -> Précondition : 0<=x,y<=3
+    func estFini( x : Int, y : Int) throws -> Bool {
+        if !(0<=x && x<=3) && !(0<=y && y<=3) { 
+            throw erreur.coordonneeHorsGrille }
+        else {
+             return LigneRemplie( x : x) || ColonneRemplie( y : y) || ZoneRemplie(x : x, y : y) }
+    }
 
-    // getPiece : Jeu x Int x Int -> Piece|Vide
-    // Renvoie la pièce présente sur la case entrée en paramètre
-    // Si CaseVide(x:x,y:y)=True alors renvoie Vide 
-    // Paramètre : x la ligne et y la colonne
-    func getPiece( x : Int, y : Int) -> Piece?
+    
+    mutating func joueurSuivant(){
+        if jCourant === j1 { jCourant = j2 }
+        else { jCourant = j1 }
+    }  
+
+    
+    func getPiece( x : Int, y : Int) -> Piece?{
+        if CaseVide(x:x,y:y) { return nil }
+        else { return grille.[x][y] }
+    }
 
 }
 
