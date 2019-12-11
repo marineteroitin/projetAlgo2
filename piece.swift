@@ -7,7 +7,7 @@ protocol TPiece {
     // Paramètre : nom de type string correspondant à la forme de la piece (  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle)
     // Paramètre : couleur correspondant a la couleur de la pièce 
     // Cette fonction ne peut pas être utilisé autre qu'en début de partie (fileprivate)
-    init(nom : String, couleur : String )
+    init(nom : String, couleur : String, forme : String )
 
     // nom : Piece -> String
     // Paramètre : Piece
@@ -37,7 +37,6 @@ class Piece : TPiece {
 	var nom : String {return self._nom}
 	var couleur : String {return self._couleur}
 	var forme : String {return  self._forme}
-
 
 	init(_ nom : String,_ couleur : String,_ forme : String) {
 		self._nom = nom

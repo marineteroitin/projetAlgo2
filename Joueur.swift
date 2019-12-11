@@ -1,9 +1,3 @@
-
-
-
-// Ce protocole représente le joueur de la partie. 
-// Le joueur aura accès a plusieurs fonctions, comme celle de voir les pièces qu'il lui reste.
-// Chaque joueur aura une couleur et des pièces de couleurs identiques.
 protocol TJoueur {
 
     //init : String -> Joueur 
@@ -110,7 +104,9 @@ class Joueur : TJoueur {
     // Informe sur la possibilité du joueur de poser une pièce sur le plateau
     // Paramètres : Jeu , Joueur 
     // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
-    func peutJouer(jeu : Jeu) -> Bool
+    func peutJouer(jeu : Jeu) -> Bool {
+        return false
+    }
 
     
     // Précondition:La pièce prise en paramètre a bien été placée  et c'est le joueur courant en paramètre ????? VERIFIER ????
@@ -121,13 +117,13 @@ class Joueur : TJoueur {
     }
 
  
-    func stringToPiece (nom : String) throws -> Piece { 
+    func stringToPiece (nom : String) throws -> Piece? { 
+        var res : Piece = nil
         if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
             throw erreur.mauvaisNomForme 
         }
         else { 
             if PieceDispo(nom : nom){ 
-              
                  for p in _listePieces {
                     if (p.nom === nom){
                      return p
@@ -136,11 +132,6 @@ class Joueur : TJoueur {
             }else{ 
                 throw erreur.pieceAbsente
             }
-           
-        }
-
-           
+        } 
     }
-    
-
 }
