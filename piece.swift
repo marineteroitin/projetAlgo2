@@ -39,6 +39,7 @@ class Piece : TPiece {
 	var forme : String {return  self.forme}
 
 
+    //RAJOUT DU PARAMETRE forme DANS LE INIT (MANQUANT)
 	init(_ nom : String,_ couleur : String,_ forme : String) {
 		self._nom = nom
 		self._couleur = couleur

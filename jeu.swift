@@ -115,10 +115,10 @@ protocol TJeu {
 }
 
 
-class Jeu : TJeu {
+struct Jeu : TJeu {
 
 
-    var grille : [[Int]]
+    var grille : [[Piece]]
     private var j1 : Joueur
     private var j2 : Joueur
 
@@ -132,10 +132,8 @@ class Jeu : TJeu {
     init() {
         j1 = Joueur("33")
         j2 = Joueur("96")
-        grille = [[Int]](repeating:[Int](repeating:Int, count: 4), count(4)) //Init a null
-
+        grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count(4)) //Init a null
     }
-
 
     
     // jCourant : Jeu -> Joueur
@@ -144,8 +142,9 @@ class Jeu : TJeu {
     // Renvoie le joueur courant  
     var jCourant : Joueur  { get }
 
+
     func CaseVide( x : Int, y : Int) throws Bool{
-        if x < 4 && y < 4 {
+        if (x < 4 && y < 4) {
             return grille[x][y] == nil
         } else {
             throw erreur.mauvaiseCoordonnees
@@ -159,7 +158,14 @@ class Jeu : TJeu {
     // Précondition : PieceDispo(Joueur,Piece)=True
     // Précondition : x le numéro de la ligne est compris entre 0 et 3 
     // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
-    func LigneDispo ( j : Joueur , p : Piece , x : Int)  -> Bool 
+    func LigneDispo ( j : Joueur , p : Piece , x : Int)  -> Bool
+        for i in range(0..4) {
+            var pieceTempo : Piece = getPiece(x, i)
+            if (pieceTempo.nom == p.nom && pieceTempo.couleur != j.couleur) {
+
+
+            }
+        }
 
     // ColonneDispo : Jeu x Joueur x Piece x Int  -> Bool 
     // Informe sur la possibilité de poser la pièce du joueur sur la colonne correspondante. 
