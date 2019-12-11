@@ -65,7 +65,7 @@ protocol TJeu {
 
     // Placer : Jeu x Joueur x Piece x Int x Int ->  Jeu
     // Fonction qui place la pièce du joueur
-    // Précondition :  PeutPoser(Jeu,Piece,x,y) =True
+    // Précondition :  PeutPlacer(Jeu,Piece,x,y) =True
     // Résultat : Renvoie le jeu modifié avec une nouvelle pièce posée sur le plateau
     // et le nombre de pièces du joueur réduite d'une. 
     // Postcondition : Retire la piece au joueur ( retirerPiece(p : p))
@@ -76,7 +76,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int 
     // Précondition : 0<=x<=3
     // Précondition : x le numéro de la ligne
-    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la ligne à ses cases remplies
     func LigneRemplie( x : Int) -> Bool
 
     // ColonneRemplie : Jeu x Int  -> Bool
@@ -84,7 +84,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int
     // Précondition : 0<=y<=3
     // Précondition : y le numéro de la colonne
-    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la colonne à ses cases remplies
     func ColonneRemplie( y : Int) -> Bool
 
     // ZoneRemplie : Jeu x Int x Int -> Bool 
@@ -92,7 +92,7 @@ protocol TJeu {
     // Paramètre : Jeu, Int, Int. 
     // Précondition : x le numéro de la ligne , y le numéro de la colonne
     // Précondition : 0<=x,y<=3
-    // Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon
+    // Renvoie True si toute la zone à ses cases remplies
     func ZoneRemplie(x : Int, y : Int) -> Bool
 
     // estFini : Jeu x Int x Int -> Bool
@@ -114,8 +114,13 @@ protocol TJeu {
 
 }
 
+enum erreur : Error {
+    case coordonneeHorsGrille
+    case peutPasPoser
+    
+}
 
-struct Jeu : TJeu {
+class Jeu : TJeu {
 
 
     private var _grille : [[Piece]]
@@ -123,6 +128,7 @@ struct Jeu : TJeu {
     private var _j2 : Joueur
 
     var jCourant : Joueur {return self._jCourant}
+
 
     // init : -> Jeu
     // Fonction de création du jeu et de 2 joueurs de couleurs différentes
@@ -132,6 +138,7 @@ struct Jeu : TJeu {
     // Postcondition : Renvoie le Jeu avec 2 joueurs de couleurs différentes qui chacun possède 8 pièces de leurs couleurs 
     // composées de 2 carrés, 2 cercles , 2 cylindres , 2 triangles 
     init() {
+
         _j1 = Joueur("33")
         _j2 = Joueur("96")
         _grille = [[Piece]](repeating:[Piece](repeating:Piece, count: 4), count: 4) //Init a null
@@ -140,10 +147,27 @@ struct Jeu : TJeu {
     func CaseVide( x : Int, y : Int) throws -> Bool{
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
             return getPiece(x,y) == nil
+
+
+
+    }
+
+
+    
+    // jCourant : Jeu -> Joueur
+    // Paramètre : Jeu
+    // Postcondition : Renvoie le joueur courant de la partie 
+    // Renvoie le joueur courant  
+    var jCourant : Joueur  { get }
+
+    func CaseVide( x : Int, y : Int) throws Bool{
+        if x < 4 && y < 4 {
+            return grille[x][y] == nil
         } else {
             throw erreur.mauvaiseCoordonnee
         }
     }
+
 
     func LigneDispo ( j : Joueur , p : Piece , x : Int) -> Bool throws -> Bool {
         if (x < 4 && y < 4 && y >= 0 && x >= 0) {
@@ -218,54 +242,108 @@ struct Jeu : TJeu {
     }
 
 
-    // Placer : Jeu x Joueur x Piece x Int x Int ->  Jeu
-    // Fonction qui place la pièce du joueur
-    // Précondition :  PeutPoser(Jeu,Piece,x,y) =True
-    // Résultat : Renvoie le jeu modifié avec une nouvelle pièce posée sur le plateau
-    // et le nombre de pièces du joueur réduite d'une. 
-    // Postcondition : Retire la piece au joueur ( retirerPiece(p : p))
-    mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) 
 
-    // LigneRemplie : Jeu x Int  -> Bool
-    // Informe si la ligne est complétée
-    // Paramètre : Jeu, Int 
-    // Précondition : 0<=x<=3
-    // Précondition : x le numéro de la ligne
-    // Renvoie True si la ligne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func LigneRemplie( x : Int) -> Bool
+    // ORAL ERREUR PeutPLacer et pas PeutPoser dans préconditions
+    mutating func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) throws {
+        if !PeutPlacer(j : j, p : p, x :x, y : y){
+            throw erreur.peutPasPoser
+        }else{
+            grille[x][y] = p
+            j.retirerPiece(p : Piece)
+        }
 
-    // ColonneRemplie : Jeu x Int  -> Bool
-    // Informe si la colonne est complétée
-    // Paramètre : Jeu, Int
-    // Précondition : 0<=y<=3
-    // Précondition : y le numéro de la colonne
-    // Renvoie True si la colonne ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func ColonneRemplie( y : Int) -> Bool
+    }
 
-    // ZoneRemplie : Jeu x Int x Int -> Bool 
-    // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
-    // Paramètre : Jeu, Int, Int. 
-    // Précondition : x le numéro de la ligne , y le numéro de la colonne
-    // Précondition : 0<=x,y<=3
-    // Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon
-    func ZoneRemplie(x : Int, y : Int) -> Bool
+  
 
-    // estFini : Jeu x Int x Int -> Bool
-    // Fonction qui permet de savoir si le jeu est fini  
-    // Précondition : x et y coordonnées de la dernière pièce placée 
-    // Résultat : renvoie vrai si LigneRemplie(jeu,x,y) = true ou ColonneRemplie(jeu,x,y) = true ou ZoneRemplie(jeu,x,y) = true , false sinon
-    func estFini( x : Int, y : Int) -> Bool
+    //ORAL ERREUR SUR CE QUE DOIT RENVOYER LA FONCTION CAR COPIER/COLLER DE LIGNEDISPO -> Renvoie True si toute les cases de la ligne sont remplies
+    //IDEM POUR LES AUTRES FONCTIONS REMPLIE
+    func LigneRemplie( x : Int) -> Bool{
+         if !(0<=x && x<=3){ 
+            throw erreur.coordonneeHorsGrille }
+        else {
+            var i : Int = 0
+            var res : Bool = true
+            while i<4 && res {
+                if CaseVide(x:x,y:i) {
+                    res = false
+                }
+                i+=1
+            }
+           return res
+        }
+    }
 
-    // joueurSuivant : Jeu -> Jeu
-    // Fonction qui permet de modifier le joueur courant.
-    // Postcondition : jCourant != joueurSuivant()
-    mutating func joueurSuivant()  
+    
+    func ColonneRemplie( y : Int) -> Bool {
+         if !(0<=y && y<=3){ 
+            throw erreur.coordonneeHorsGrille }
+        else {
+            var i : Int = 0
+            var res : Bool = true
+            while i<4 && res {
+                if CaseVide(x:i,y:y) {
+                    res = false
+                }
+                i+=1
+            }
+           return res
+        }
+    }
 
-    // getPiece : Jeu x Int x Int -> Piece|Vide
-    // Renvoie la pièce présente sur la case entrée en paramètre
-    // Si CaseVide(x:x,y:y)=True alors renvoie Vide 
-    // Paramètre : x la ligne et y la colonne
-    func getPiece( x : Int, y : Int) -> Piece?
+    //fonction qui permet de retourner en haut à gauche d'une région
+    private func region(x : Int, y : Int) -> (Int,Int){
+        return ((x/2*2),(y/2*2))
+    }
+
+    func ZoneRemplie(x : Int, y : Int) -> Bool {
+
+        if !(0<=x && x<=3) && !(0<=y && y<=3) { 
+            throw erreur.coordonneeHorsGrille }
+        else { 
+            var res : Bool = true
+            //récupérer les coordonnée en haut à gauche de la zone
+            var coord : (Int,Int) = region(x : x, y : y)
+            var l : Int = coord[0]
+            var c : Int = coord[1]
+
+
+            while res && ((l <= coord[0]+1) && (c <= coord[1]+1)) { //je n'ai pas trouvé de case vide et je ne suis pas en bas à droite de ma zone
+                if CaseVide(x:l,y:c) {
+                    res = false
+                }
+                c = c+1 //passe à la colonne suivante
+                if c > coord[1]+1 { // passe à la ligne suivante
+                    c = coord[0]
+                    l = l+1 }
+            }
+            return res
+
+        }
+
+    }
+
+   
+    // Précondition : x et y coordonnées de la dernière pièce placée A VERIFIER ??????
+    // ORAL DIRE OUBLIE -> Précondition : 0<=x,y<=3
+    func estFini( x : Int, y : Int) throws -> Bool {
+        if !(0<=x && x<=3) && !(0<=y && y<=3) { 
+            throw erreur.coordonneeHorsGrille }
+        else {
+             return LigneRemplie( x : x) || ColonneRemplie( y : y) || ZoneRemplie(x : x, y : y) }
+    }
+
+    
+    mutating func joueurSuivant(){
+        if jCourant === j1 { jCourant = j2 }
+        else { jCourant = j1 }
+    }  
+
+    
+    func getPiece( x : Int, y : Int) -> Piece?{
+        if CaseVide(x:x,y:y) { return nil }
+        else { return grille.[x][y] }
+    }
 
 }
 
