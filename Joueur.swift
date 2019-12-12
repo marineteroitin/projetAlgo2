@@ -99,13 +99,28 @@ class Joueur : TJoueur {
     // Informe sur la possibilité du joueur de poser une pièce sur le plateau
     // Paramètres : Jeu , Joueur 
     // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
+    // -> vérifier qu'au moins une case PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool
     func peutJouer(jeu : Jeu) -> Bool {
-        // A CODER !!!!!!!!!!
-        return false
+       var res : Bool = false
+       var l : Int = 0
+       var c : Int = 0
+       while !res && i < listePieces.count { //je teste toutes les pieces restantes tant que j'en ai pas trouvé une qui peut jouer
+         while !res && (l < 4){
+             while !res && (c < 4){
+                 if j.PeutPlacer( p : listePieces[i], x : c, y : l){
+                     res = true
+                 }
+                 c+=1
+             }
+             l+=1
+             c = 0
+         }
+          i+=1  
+          l = 0
+
+       }
     }
 
-    
-    // Précondition:La pièce prise en paramètre a bien été placée  et c'est le joueur courant en paramètre ????? VERIFIER ????
    func retirerPiece(p : Piece) {
         guard self.listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { fatalError("Pièce absente !!!!!")}
         var i : Int = 0
