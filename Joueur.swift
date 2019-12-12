@@ -18,7 +18,7 @@ protocol TJoueur {
     // Paramètre : Joueur , String 
     // Précondition : le nom de type String est l'un de ces choix :  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle
     // Résultat : renvoie True si le joueur possède encore cette pièce, False sinon 
-    func PieceDispo(nom : String) throws -> Bool  
+    func PieceDispo(nom : String) -> Bool  
 
     // PieceRestantes : Joueur -> [Piece]
     // Informe sur les pièces restantes et leur quantités
@@ -54,28 +54,34 @@ protocol TJoueur {
 
 
 class Joueur : TJoueur {
-    private var _listePieces : [Piece] = [Piece]()
-
-    var listePieces : [Piece] { return self._listePieces }
+   
+    private (set) var listePieces : [Piece]
 
     required init(couleur : String){
         self.couleur = couleur
-        self._listePieces = [ p1 : Piece("ca",couleur,"25A0"), p2 : Piece("ca",couleur,"25A0"), p3 : Piece("cy",couleur,"26C1"), p4 : Piece("cy",couleur,"26C1"), p5 : Piece("ce",couleur,"2B24"), p6 : Piece("ce",couleur,"2B24"), p7 : Piece("tr",couleur,"1403"), p8 : Piece("tr",couleur,"1403") ]
+        self.listePieces = [Piece(nom : "ca",couleur : couleur, forme : "25A0"),
+        Piece(nom : "ca",couleur : couleur,forme : "25A0"),
+        Piece(nom : "cy",couleur : couleur,forme : "26C1"),
+        Piece(nom : "cy",couleur : couleur,forme : "26C1"),
+        Piece(nom : "ce",couleur : couleur,forme : "2B24"),
+        Piece(nom : "ce",couleur : couleur,forme : "2B24"),
+        Piece(nom : "tr",couleur : couleur,forme : "1403"),
+        Piece(nom : "tr",couleur : couleur,forme : "1403")]
     }
 
 
     private (set) var couleur : String  
     
     
-    func PieceDispo(nom : String) throws -> Bool  {
+    func PieceDispo(nom : String) -> Bool  {
         var res : Bool = false
 
-        if !(nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") { 
-            throw MesErreur.mauvaisNomForme 
+        if !(nom == "ce" || nom == "ca" || nom == "cy" || nom == "tr") { 
+            fatalError("ce n'est pas une forme de pièce !!!!!") 
         }
         else { 
-             for p in _listePieces {
-                 if (p.nom === nom){
+             for p in listePieces {
+                 if (p.nom == nom){
                       res = true
                 }
             }
@@ -85,7 +91,7 @@ class Joueur : TJoueur {
     }
    
     func PieceRestantes() -> [Piece] {
-        return self._listePieces
+        return self.listePieces
     }
 
 
@@ -100,24 +106,37 @@ class Joueur : TJoueur {
 
     
     // Précondition:La pièce prise en paramètre a bien été placée  et c'est le joueur courant en paramètre ????? VERIFIER ????
-   func retirerPiece(p : Piece) throws {
-        guard self._listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { throw MesErreur.pieceAbsente}
-        self._listePieces.remove(p)
-
+   func retirerPiece(p : Piece) {
+        guard self.listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { fatalError("Pièce absente !!!!!")}
+        var i : Int = 0
+		var fin : Bool = false
+		
+		while i<listePieces.count && !fin {
+		
+			if listePieces[i] == p {
+				fin = true
+			}
+			else {
+				i+=1
+			}
+		}
+		listePieces.remove(at : i)		
     }
 
  
-    func stringToPiece (nom : String) throws -> Piece { 
-        var res : Piece 
-        guard (nom === "ce" || nom === "ca" || nom === "cy" || nom === "tr") else { 
-            throw MesErreur.mauvaisNomForme 
+    func stringToPiece (nom : String) -> Piece { 
+        var res : Piece? 
+        guard (nom == "ce" || nom == "ca" || nom == "cy" || nom == "tr") else { 
+            fatalError("mauvaise forme !!!!!")
         }
-        guard PieceDispo(nom : nom) else {  throw MesErreur.pieceAbsente }
-        for p in _listePieces {
-            if (p.nom === nom){
+        guard PieceDispo(nom : nom) else {  fatalError(" pièce absente!!!!!") }
+        for p in listePieces {
+            if (p.nom == nom){
                 res = p
             }
         }
-        return res  
+        if let toto = res {
+            return toto
+        } else { fatalError("pas de résultat  -_- ")} 
     }
 }
