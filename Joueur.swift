@@ -104,10 +104,12 @@ class Joueur : TJoueur {
        var res : Bool = false
        var l : Int = 0
        var c : Int = 0
+       var i : Int = 0
+
        while !res && i < listePieces.count { //je teste toutes les pieces restantes tant que j'en ai pas trouvé une qui peut jouer
          while !res && (l < 4){
              while !res && (c < 4){
-                 if j.PeutPlacer( p : listePieces[i], x : c, y : l){
+                 if jeu.PeutPlacer(j : self, p : self.listePieces[i], x : c, y : l){
                      res = true
                  }
                  c+=1
@@ -119,6 +121,7 @@ class Joueur : TJoueur {
           l = 0
 
        }
+       return res
     }
 
    func retirerPiece(p : Piece) {

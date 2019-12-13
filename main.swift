@@ -82,7 +82,7 @@ while !estFini {
 	while (!aJoue){
 		// Affichage du joueur courant et de ses pièces restantes
 		print("Le joueur : " , jeu.jCourant.couleur ," place sa pièce " )
-		for p in jeu.jCourant.PieceRestantes {
+		for p in jeu.jCourant.PieceRestantes() {
 			print (" Les pièces disponibles sont : ", p.nom)
 		}
 		
@@ -94,7 +94,7 @@ while !estFini {
 
 
 		var pieceString : String = ""
-		var piece : Piece
+		var piece : Piece? = nil // OUBLI D'INITIALISER !!!!
 		//Boucle qui vérifie si le string en entrée (readLine) est correct 
 		while(!pieceOk){
 			if let _piece = readLine() {
@@ -126,33 +126,37 @@ while !estFini {
 		let y = lireNombre()
 
 		// Vérifie si le joueur peut placer sa piece 
-		let peutPlacer : Bool  = jeu.PeutPlacer(j : jeu.jCourant, p : piece, x : x, y : y)
+		var peutPlacer : Bool = false
+		if let _piece = piece { peutPlacer  = jeu.PeutPlacer(j : jeu.jCourant, p : _piece, x : x, y : y) }
+		//si piece vide on fait rien
 
 		// Place la piece si c'est possible et s'il confirme
 		if(peutPlacer) {
-			print ("Confirmer le placement : ", piece , " ,x : " , x , " ,y : " , y , " ? ( oui/o ou autre pour non")
-			if let ok = readLine() {
-				let ok = ok.lowercased()
+			if let _piece = piece {
+				print ("Confirmer le placement : ", _piece , " ,x : " , x , " ,y : " , y , " ? ( oui/o ou autre pour non")
+				if let ok = readLine() {
+					let ok = ok.lowercased()
 
-				if( ok == "oui" || ok == "o" ){
-					jeu.Placer(j : jeu.jCourant, p : piece, x : x, y : y)
-					aJoue = true 
+					if( ok == "oui" || ok == "o" ){
+						jeu.Placer(j : &jeu.jCourant, p : _piece, x : x, y : y)
+						aJoue = true 
 
-					// Vérification si la partie est finie
-					if (jeu.estFini(x : x, y : y) ) {
-						print(jeu.jCourant , " a gagné !!!!!!")
-						estFini = true
-					}
-					// Change de joueur si le jeu n'est pas fini 
-					else { 
-						let jprec : Joueur = jeu.jCourant
-						jeu.joueurSuivant()
-						// Vérifie que le nouveau joueur peut jouer sinon le jeu est fini 
-						if( !jeu.jCourant.peutJouer(jeu : jeu)) {
-							print(jprec , " a gagné !!!!!!")
+						// Vérification si la partie est finie
+						if (jeu.estFini(x : x, y : y) ) {
+							print(jeu.jCourant , " a gagné !!!!!!")
+							estFini = true
 						}
-					}
-				}	
+						// Change de joueur si le jeu n'est pas fini 
+						else { 
+							let jprec : Joueur = jeu.jCourant
+							jeu.joueurSuivant()
+							// Vérifie que le nouveau joueur peut jouer sinon le jeu est fini 
+							if( !jeu.jCourant.peutJouer(jeu : jeu)) {
+								print(jprec , " a gagné !!!!!!")
+							}
+						}
+					}	
+				}
 			}
 		}
 		// Si le joueur n'a pas pu placer sa pièce retour en boucle aJoue

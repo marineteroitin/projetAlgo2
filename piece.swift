@@ -35,7 +35,7 @@ struct Piece : TPiece, Equatable {
 	private (set) var forme : String 
 
 	
-	required init(nom : String, couleur : String, forme : String) {
+	init(nom : String, couleur : String, forme : String) {
 		self.nom = nom
 		self.couleur = couleur
 		self.forme = forme
