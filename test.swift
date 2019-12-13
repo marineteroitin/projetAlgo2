@@ -337,3 +337,384 @@ class Jeu : TJeu {
     }
 
 }
+
+protocol TJoueur {
+
+    //init : String -> Joueur 
+    // Fonction de création du joueur a partir de sa couleur qui est différente de l'autre joueur 
+    // Postcondition : Initialise sa couleur qui ne change pas et ses 8 pièces composées de  2 carré , 2 cylindre , 2 cercle, 2 triangle et pas d'autres.
+    // Postcondition : Toutes les pièces sont aussi de la même couleur que le joueur. 
+    init(couleur : String)
+
+    // couleur : Joueur -> String
+    // Paramètre : Joueur
+    // Renvoie la couleur du joueur en paramètre
+    // PostCondition : le string de retour est soit "33" = claire ou "92" = foncée
+    // Détail : Cela représente les codes de couleurs pour l'affichage. 
+    var couleur : String {get}
+
+    // PieceDispo : Joueur x Sting -> Bool
+    // Renvoie un booléen afin de savoir si le joueur possède la pièce passé en string
+    // Paramètre : Joueur , String 
+    // Précondition : le nom de type String est l'un de ces choix :  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle
+    // Résultat : renvoie True si le joueur possède encore cette pièce, False sinon 
+    func PieceDispo(nom : String) -> Bool  
+
+    // PieceRestantes : Joueur -> [Piece]
+    // Informe sur les pièces restantes et leur quantités
+    // Paramètre : Joueur 
+    // Resultat : Renvoie la liste des pièces non jouées du joueur pris en paramètre. 
+    // Postcondition : le tableau renvoyé représente les pièces que le joueur possède.
+    // Détail : S'il possède 2 carré, alors il y aura 2 fois carré dans la collection. 
+    func PieceRestantes() -> [Piece] 
+
+
+    // peutJouer : Jeu x Joueur -> Bool
+    // Informe sur la possibilité du joueur de poser une pièce sur le plateau
+    // Paramètres : Jeu , Joueur 
+    // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
+    func peutJouer(jeu : Jeu) -> Bool
+
+    // retirerPiece : Joueur x Piece -> Joueur
+    // Retire la piece que le joueur vient de placer de ses pièces restantes 
+    // Paramètre : Joueur qui représente le joueur courant 
+    // Paramètre : Piece qui représente celle qui vient d'être placée 
+    // Précondition : La pièce prise en paramètre a bien été placée 
+    // Résultat : Renvoie un joueur avec cette pièce en moins dans sa collection de pièces restantes. 
+    mutating func retirerPiece(p:Piece)
+
+    // stringToPiece : Joueur x String -> Piece
+    // Fonction qui renvoie la piece correspondante au string recu pour l'input ou bien pour récupérer la pièce du plateau 
+    // Paramètre : Joueur, String 
+    // Precondition : le string en parametre correspond à :  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle 
+    // Resultat : Renvoie la piece qui a comme nom le paramètre rentré
+    func stringToPiece (nom : String) -> Piece
+}
+
+
+
+class Joueur : TJoueur {
+   
+    private (set) var listePieces : [Piece]
+
+    required init(couleur : String){
+        self.couleur = couleur
+        self.listePieces = [Piece(nom : "ca",couleur : couleur, forme : "25A0"),
+        Piece(nom : "ca",couleur : couleur,forme : "25A0"),
+        Piece(nom : "cy",couleur : couleur,forme : "26C1"),
+        Piece(nom : "cy",couleur : couleur,forme : "26C1"),
+        Piece(nom : "ce",couleur : couleur,forme : "2B24"),
+        Piece(nom : "ce",couleur : couleur,forme : "2B24"),
+        Piece(nom : "tr",couleur : couleur,forme : "1403"),
+        Piece(nom : "tr",couleur : couleur,forme : "1403")]
+    }
+
+
+    private (set) var couleur : String  
+    
+    
+    func PieceDispo(nom : String) -> Bool  {
+        var res : Bool = false
+
+        if !(nom == "ce" || nom == "ca" || nom == "cy" || nom == "tr") { 
+            fatalError("ce n'est pas une forme de pièce !!!!!") 
+        }
+        else { 
+             for p in listePieces {
+                 if (p.nom == nom){
+                      res = true
+                }
+            }
+           
+        }
+        return res
+    }
+   
+    func PieceRestantes() -> [Piece] {
+        return self.listePieces
+    }
+
+
+    // peutJouer : Jeu x Joueur -> Bool
+    // Informe sur la possibilité du joueur de poser une pièce sur le plateau
+    // Paramètres : Jeu , Joueur 
+    // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
+    // -> vérifier qu'au moins une case PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool
+    func peutJouer(jeu : Jeu) -> Bool {
+       var res : Bool = false
+       var l : Int = 0
+       var c : Int = 0
+       var i : Int = 0
+
+       while !res && i < listePieces.count { //je teste toutes les pieces restantes tant que j'en ai pas trouvé une qui peut jouer
+         while !res && (l < 4){
+             while !res && (c < 4){
+                 if jeu.PeutPlacer(j : self, p : self.listePieces[i], x : c, y : l){
+                     res = true
+                 }
+                 c+=1
+             }
+             l+=1
+             c = 0
+         }
+          i+=1  
+          l = 0
+
+       }
+       return res
+    }
+
+   func retirerPiece(p : Piece) {
+        guard self.listePieces.contains(p)/*je vérifie qu'il a bien la pièce à enlever */ else { fatalError("Pièce absente !!!!!")}
+        var i : Int = 0
+		var fin : Bool = false
+		
+		while i<listePieces.count && !fin {
+		
+			if listePieces[i] == p {
+				fin = true
+			}
+			else {
+				i+=1
+			}
+		}
+		listePieces.remove(at : i)		
+    }
+
+ 
+    func stringToPiece (nom : String) -> Piece { 
+        var res : Piece? 
+        guard (nom == "ce" || nom == "ca" || nom == "cy" || nom == "tr") else { 
+            fatalError("mauvaise forme !!!!!")
+        }
+        guard PieceDispo(nom : nom) else {  fatalError(" pièce absente!!!!!") }
+        for p in listePieces {
+            if (p.nom == nom){
+                res = p
+            }
+        }
+        if let toto = res {
+            return toto
+        } else { fatalError("pas de résultat  -_- ")} 
+    }
+}
+// Le protocole Piece représente les différentes pièces présentes dans le jeu. 
+// Chaque joueur possède 2 pièce de chaque forme. 
+// La création de pièce ne sera effectué qu'en début de partie
+protocol TPiece {
+    // init : String x String -> Piece
+    // Initialise une pièce grâce a son nom et sa couleur 
+    // Paramètre : nom de type string correspondant à la forme de la piece (  "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle)
+    // Paramètre : couleur correspondant a la couleur de la pièce 
+    // Cette fonction ne peut pas être utilisé autre qu'en début de partie (fileprivate)
+    init(nom : String, couleur : String, forme : String )
+
+    // nom : Piece -> String
+    // Paramètre : Piece
+    // Postcondition : nom de la piece : "ce" = Cercle ou "ca" = Carre ou "cy" = Cylindre ou "tr" = Triangle
+    var nom : String { get }
+
+    // couleur : Piece -> Couleur
+    // Paramètre : Piece 
+    // Postcondition : Renvoie "33" = claire ou "92" = fonce et rien d'autre. 
+    var couleur : String { get }
+
+    // forme : Piece -> String 
+    // Renvoie la forme de la piece sous Unicode pour l'affichage 
+    // Postcondition : le String est un unicode avec : "1403" = triangle , "25A0" = carré , "2B24" = cercle, "26C1"= cylindre
+    var forme : String {get}
+
+
+}
+
+
+struct Piece : TPiece, Equatable {
+
+	private (set) var nom : String 
+	private (set) var couleur : String 
+	private (set) var forme : String 
+
+	
+	init(nom : String, couleur : String, forme : String) {
+		self.nom = nom
+		self.couleur = couleur
+		self.forme = forme
+	}
+    static func == (lhs: Piece, rhs: Piece) -> Bool {
+        return
+          lhs.nom == rhs.nom
+    }
+   
+}
+
+// ============================ Fonctions utilitaires =================================================
+// Fonction qui permet de lire un entier 
+// Post condition : l'entier est entre 0 et 3
+func lireNombre() -> Int {
+	var entierOk = false
+	var i : Int = -1
+	while (!entierOk){
+		if let input = readLine() {
+		    if let int = Int(input) {
+		    	if( int >= 0 && int <= 3 ) {
+		    		entierOk=true
+		    		i = int
+		    	} 
+		    }else {
+		    		print(" La coordonnée doit être en 0 et 3 inclut, veuillez retaper : ")
+		    }
+		}
+	}
+	return i
+
+}
+
+// jeuToString : Jeu -> [[String]] 
+// Fonction qui permet de créer un tableau de string de l'état du jeu
+// PostCondition : tab tableau de string contenant ou - si la case et vide ou la forme colorée du joueur 
+func jeuToString(j : Jeu) -> [[String]]{
+	var tab : [[String]] = [["-","-","-","-"],["-","-","-","-"],["-","-","-","-"],["-","-","-","-"]]
+	for x in 0...3{
+		for y in 0...3 {
+			let pTmp : Piece? = j.getPiece(x : x ,y : y)
+			if let piece = pTmp {
+				let couleur : String = piece.couleur
+				if piece.nom == "tr"{
+					tab[x][y] = "\u{1B}["+couleur+"m\u{1403}\u{1B}[0m"
+				}
+				
+				else if piece.nom == "ca" {
+					tab[x][y] = "\u{1B}["+couleur+"m\u{25A0}\u{1B}[0m"
+				}
+				else if piece.nom == "ce" {
+					tab[x][y] = "\u{1B}["+couleur+"m\u{2B24}\u{1B}[0m"
+				}
+				else {
+					tab[x][y] = "\u{1B}["+couleur+"m\u{26C1}\u{1B}[0m"
+				}
+			}
+		}
+	}
+	return tab
+}
+
+// afficher : [[String]] 
+// fonction qui affiche les lignes du tableau
+// Precondition : tab :tableau de string contenant  "-" si la case est vide ou la forme colorée du joueur 
+func afficher( tab : [[String]])  {
+	var message : String = ""
+	for i in 0..<4{
+		for j in 0..<4{
+			message += tab[i][j] + " " 
+		}
+			message += "\n"
+		}
+		print(message)
+}
+
+// ============================ Programme principal =================================================
+// Déroulement du programe principal 
+
+// Initialisation de la partie 
+var jeu : Jeu = Jeu()
+var estFini : Bool = false
+
+print(" le ",jeu.jCourant.couleur, " commence")
+
+while !estFini {
+	// Affichage du jeu chaque tour
+	afficher(tab : jeuToString( j : jeu))
+	var aJoue = false
+
+	// Boucle pour réaliser un tour de jeu 
+	while (!aJoue){
+		// Affichage du joueur courant et de ses pièces restantes
+		print("Le joueur : " , jeu.jCourant.couleur ," place sa pièce " )
+		for p in jeu.jCourant.PieceRestantes() {
+			print (" Les pièces disponibles sont : ", p.nom)
+		}
+		
+
+
+		// Choix de la pièce
+		print("Quel pièce voulez-vous choisir ? (ce : Cercle - ca : Carre - cy : Cylindre - tr : Triangle")
+		var pieceOk : Bool = false
+
+
+		var pieceString : String = ""
+		var piece : Piece? = nil // OUBLI D'INITIALISER !!!!
+		//Boucle qui vérifie si le string en entrée (readLine) est correct 
+		while(!pieceOk){
+			if let _piece = readLine() {
+				
+				let _piece = _piece.lowercased()
+				if( _piece == "ca" || _piece == "ce" || _piece == "cy" || _piece == "tr"){
+					//pieceOk = true
+					pieceString  = _piece
+
+					if jeu.jCourant.PieceDispo(nom : pieceString) { // SI la piece appartient au joueur
+						 piece = jeu.jCourant.stringToPiece(nom : pieceString )
+						 pieceOk = true
+					}
+				}			
+			}else { 
+	    		print(" Le nom de la piece doit être ca,ce,cy ou tr. veuillez retaper : ")
+	    	}
+		}
+		
+
+		
+
+		// Choix de la coordonnée x
+		print("Coordonnées x : ")
+		let x = lireNombre()
+
+		// Choix de la coordonnée y
+		print("Coordonnées y : ")
+		let y = lireNombre()
+
+		// Vérifie si le joueur peut placer sa piece 
+		var peutPlacer : Bool = false
+		if let _piece = piece { peutPlacer  = jeu.PeutPlacer(j : jeu.jCourant, p : _piece, x : x, y : y) }
+		//si piece vide on fait rien
+
+		// Place la piece si c'est possible et s'il confirme
+		if(peutPlacer) {
+			if let _piece = piece {
+				print ("Confirmer le placement : ", _piece , " ,x : " , x , " ,y : " , y , " ? ( oui/o ou autre pour non")
+				if let ok = readLine() {
+					let ok = ok.lowercased()
+
+					if( ok == "oui" || ok == "o" ){
+						jeu.Placer(j : &jeu.jCourant, p : _piece, x : x, y : y)
+						aJoue = true 
+
+						// Vérification si la partie est finie
+						if (jeu.estFini(x : x, y : y) ) {
+							print(jeu.jCourant , " a gagné !!!!!!")
+							estFini = true
+						}
+						// Change de joueur si le jeu n'est pas fini 
+						else { 
+							let jprec : Joueur = jeu.jCourant
+							jeu.joueurSuivant()
+							// Vérifie que le nouveau joueur peut jouer sinon le jeu est fini 
+							if( !jeu.jCourant.peutJouer(jeu : jeu)) {
+								print(jprec.couleur , " a gagné !!!!!!")
+							}
+						}
+					}	
+				}
+			}
+		}
+		// Si le joueur n'a pas pu placer sa pièce retour en boucle aJoue
+		else {
+			print("Parametre incorrect ")
+		}
+
+	}// Fin de boucle aJoue
+
+}// Fin de boucle estFini  
+
+
+

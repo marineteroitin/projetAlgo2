@@ -71,7 +71,7 @@ func afficher( tab : [[String]])  {
 var jeu : Jeu = Jeu()
 var estFini : Bool = false
 
-print(" le ",jeu.jCourant, " commence")
+print(" le ",jeu.jCourant.couleur, " commence")
 
 while !estFini {
 	// Affichage du jeu chaque tour
@@ -152,7 +152,7 @@ while !estFini {
 							jeu.joueurSuivant()
 							// Vérifie que le nouveau joueur peut jouer sinon le jeu est fini 
 							if( !jeu.jCourant.peutJouer(jeu : jeu)) {
-								print(jprec , " a gagné !!!!!!")
+								print(jprec.couleur , " a gagné !!!!!!")
 							}
 						}
 					}	
