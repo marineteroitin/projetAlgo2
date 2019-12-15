@@ -143,7 +143,7 @@ while !estFini {
 
 						// Vérification si la partie est finie
 						if (jeu.estFini(x : x, y : y) ) {
-							print(jeu.jCourant , " a gagné !!!!!!")
+							print(jeu.jCourant.couleur , " a gagné !!!!!!")
 							estFini = true
 						}
 						// Change de joueur si le jeu n'est pas fini 

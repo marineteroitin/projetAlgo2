@@ -167,7 +167,6 @@ class Jeu : TJeu {
             var tab : [Piece?] = []
             for i in 0..<4 {
                 //transforme une colonne en un tableau
-                print("ColonneDispo()", i)
                 tab.append(getPiece(x : i,y : y))
             }
             return Dispo(j : j, p : p, tab : tab)
@@ -226,7 +225,6 @@ class Jeu : TJeu {
         if let nv = getPiece(x : x,y : y){
            //la case est non vide donc je peux pas placer donc res reste à false
         } else {
-        
             res = (ZoneDispo( j : j, p : p, x : x, y : y) && LigneDispo( j : j, p : p, x : x) && ColonneDispo( j : j, p : p, y : y))
         }
         return res
@@ -691,7 +689,7 @@ while !estFini {
 
 						// Vérification si la partie est finie
 						if (jeu.estFini(x : x, y : y) ) {
-							print(jeu.jCourant , " a gagné !!!!!!")
+							print(jeu.jCourant.couleur , " a gagné !!!!!!")
 							estFini = true
 						}
 						// Change de joueur si le jeu n'est pas fini 
