@@ -222,9 +222,7 @@ class Jeu : TJeu {
     // Résultat : Renvoie vrai si la pièce peut être placée Sinon faux
     func PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool {
         var res : Bool = false
-        if let nv = getPiece(x : x,y : y){
-           //la case est non vide donc je peux pas placer donc res reste à false
-        } else {
+        if getPiece(x : x,y : y) == nil {
             res = (ZoneDispo( j : j, p : p, x : x, y : y) && LigneDispo( j : j, p : p, x : x) && ColonneDispo( j : j, p : p, y : y))
         }
         return res
