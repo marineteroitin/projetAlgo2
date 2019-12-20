@@ -123,16 +123,8 @@ class Jeu : TJeu {
     private var _j1 : Joueur
     private var _j2 : Joueur
 
-     var jCourant : Joueur // OBLIGE DE METTRE UN SET CAR ON MODIFIE LA LISTE DES PIONS DU  JOUEUR COURANT QD IL PLACE UN PION !!
+     var jCourant : Joueur
 
-
-    // init : -> Jeu
-    // Fonction de création du jeu et de 2 joueurs de couleurs différentes
-    // Et détermine aléatoirement le premier joueur qui deviendra le joueur courant
-    // Initialise un tableau de 4x4 qui pour toutes coordonées x et y renvoie Vide 
-    // avec 0 <= x,y <= 3
-    // Postcondition : Renvoie le Jeu avec 2 joueurs de couleurs différentes qui chacun possède 8 pièces de leurs couleurs 
-    // composées de 2 carrés, 2 cercles , 2 cylindres , 2 triangles 
     required init() {
 
         self._j1 = Joueur(couleur : "33")
@@ -188,11 +180,7 @@ class Jeu : TJeu {
         return dispo
     }
 
-    // ZoneDispo : Jeu x Joueur x Piece x Int x Int   -> Bool 
-    // Informe sur la possibilité de poser la pièce du joueur sur la zone correspondante. 
-    // Param : Jeu, Joueur, Pièce, x de type Int, y de type Int
-    // Précondition : PieceDispo(Joueur,Piece)=True et x, la ligne ,y la colonne, comprisent entre 0 et 3 inclus
-    // Résultat :  Renvoie True si la zone ne possède pas de pièce de la même forme que l’autre joueur. False sinon 
+
     func ZoneDispo( j : Joueur , p : Piece, x : Int, y : Int ) -> Bool {
         if !(x < 4 && y < 4 && y >= 0 && x >= 0) {
            fatalError("coordonés hors grille !!!!!")
@@ -211,15 +199,6 @@ class Jeu : TJeu {
         }
     }
 
-    // PeutPlacer : Jeu x Joueur x Piece x Int x Int -> Bool
-    // renvoie un booléen afin de savoir si le joueur peut poser sa pièce sur la case. 
-    // Donc il test si on a bien ZoneDispo, ColonneDispo, LigneDispo,CaseVide et PieceDispo 
-    // Ecrit un message d'erreur dans la console selon le type d'erreur :
-    // ZoneDispo = false ou ColonneDispo = false ou LigneDispo = fasle ou CaseVide = false ou PieceDispo = false
-    // Param : Jeu , Joueur, Piece , x ,y 
-    // Précondtion : CaseVide(Jeu,x,y) = True  , PieceDispo(Joueur,Piece) = True  , 
-    // Précondition : x numéro de ligne, y numéro de colonne
-    // Résultat : Renvoie vrai si la pièce peut être placée Sinon faux
     func PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool {
         var res : Bool = false
         if getPiece(x : x,y : y) == nil {
@@ -229,8 +208,6 @@ class Jeu : TJeu {
     }
 
 
-
-    // ORAL ERREUR PeutPLacer et pas PeutPoser dans préconditions
     func Placer( j : inout Joueur, p : Piece, x : Int, y : Int) {
         if !PeutPlacer(j : j, p : p, x :x, y : y){
            fatalError("Tu peux pas poser ta pièce ici !!!!!!")
@@ -241,10 +218,7 @@ class Jeu : TJeu {
 
     }
 
-  
 
-    //ORAL ERREUR SUR CE QUE DOIT RENVOYER LA FONCTION CAR COPIER/COLLER DE LIGNEDISPO -> Renvoie True si toute les cases de la ligne sont remplies
-    //IDEM POUR LES AUTRES FONCTIONS REMPLIE
     func LigneRemplie( x : Int)-> Bool{
          if !(0<=x && x<=3){ 
             fatalError("coordonés hors grille !!!!!") }
@@ -311,8 +285,6 @@ class Jeu : TJeu {
     }
 
    
-    // Précondition : x et y coordonnées de la dernière pièce placée A VERIFIER ??????
-    // ORAL DIRE OUBLIE -> Précondition : 0<=x,y<=3
     func estFini( x : Int, y : Int) -> Bool {
         if !(0<=x && x<=3) && !(0<=y && y<=3) { 
            fatalError("coordonés hors grille !!!!!") }
@@ -430,12 +402,6 @@ class Joueur : TJoueur {
         return self.listePieces
     }
 
-
-    // peutJouer : Jeu x Joueur -> Bool
-    // Informe sur la possibilité du joueur de poser une pièce sur le plateau
-    // Paramètres : Jeu , Joueur 
-    // Renvoie True si avec les pièces restantes que le joueur possède, il peut jouer. False sinon 
-    // -> vérifier qu'au moins une case PeutPlacer( j : Joueur, p : Piece, x : Int, y : Int) -> Bool
     func peutJouer(jeu : Jeu) -> Bool {
        var res : Bool = false
        var l : Int = 0
